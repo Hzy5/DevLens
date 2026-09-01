@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Analytics } from "@vercel/analytics/react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -90,6 +91,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             </a>
             {children}
             <Analytics />
+            <Script src="/page-pulse.js" strategy="afterInteractive" />
           </div>
         </AuthProvider>
       </body>
