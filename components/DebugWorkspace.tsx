@@ -101,6 +101,7 @@ export function DebugWorkspace() {
   }
 
   function analyzeAnother() {
+    setMode("auto");
     setAnalysis(null);
     setError(null);
     setView("input");
