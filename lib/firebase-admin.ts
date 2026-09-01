@@ -1,14 +1,14 @@
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
-import { getAuth } from "firebase-admin/auth";
 import { getFirestore } from "firebase-admin/firestore";
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
 function adminCredentials() {
   const projectId = process.env.FIREBASE_ADMIN_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL;
+  const clientEmail = process.env.FIREBASE_ADMIN_CLIENT_EMAIL?.trim();
   const privateKey = process.env.FIREBASE_ADMIN_PRIVATE_KEY?.replace(
     /\\n/g,
     "\n",
-  );
+  ).replace(/^["']|["']$/g, "");
 
   if (!projectId || !clientEmail || !privateKey) {
     return null;
@@ -25,37 +25,43 @@ function adminProjectId() {
   );
 }
 
-export function hasFirestoreCredentials() {
-  return Boolean(adminCredentials());
-}
+const googleSecureTokenJwks = createRemoteJWKSet(
+  new URL(
+    "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+  ),
+);
 
 function getAdminApp(): App | null {
-  if (getApps().length) {
-    return getApps()[0] ?? null;
-  }
+  try {
+    if (getApps().length) {
+      return getApps()[0] ?? null;
+    }
 
-  const credentials = adminCredentials();
-  if (credentials) {
+    const credentials = adminCredentials();
+    if (!credentials) return null;
+
     return initializeApp({
       credential: cert(credentials),
     });
+  } catch (error) {
+    console.error("firebase_admin_init_failed", {
+      type: error instanceof Error ? error.name : "unknown",
+    });
+    return null;
   }
-
-  const projectId = adminProjectId();
-  if (!projectId) return null;
-
-  return initializeApp({ projectId });
-}
-
-function getAdminAuth() {
-  const app = getAdminApp();
-  return app ? getAuth(app) : null;
 }
 
 export function getAdminDb() {
-  if (!hasFirestoreCredentials()) return null;
-  const app = getAdminApp();
-  return app ? getFirestore(app) : null;
+  try {
+    if (!adminCredentials()) return null;
+    const app = getAdminApp();
+    return app ? getFirestore(app) : null;
+  } catch (error) {
+    console.error("firebase_admin_db_failed", {
+      type: error instanceof Error ? error.name : "unknown",
+    });
+    return null;
+  }
 }
 
 export type VerifiedRequestUser = {
@@ -71,15 +77,23 @@ export async function verifyRequestUser(
   const token = header?.startsWith("Bearer ") ? header.slice(7).trim() : "";
   if (!token) return null;
 
-  const auth = getAdminAuth();
-  if (!auth) return null;
+  const projectId = adminProjectId();
+  if (!projectId) return null;
 
   try {
-    const decoded = await auth.verifyIdToken(token);
+    const { payload } = await jwtVerify(token, googleSecureTokenJwks, {
+      issuer: `https://securetoken.google.com/${projectId}`,
+      audience: projectId,
+      clockTolerance: 5,
+    });
+
+    const uid = typeof payload.sub === "string" ? payload.sub : "";
+    if (!uid) return null;
+
     return {
-      uid: decoded.uid,
-      email: decoded.email ?? null,
-      emailVerified: Boolean(decoded.email_verified),
+      uid,
+      email: typeof payload.email === "string" ? payload.email : null,
+      emailVerified: payload.email_verified === true,
     };
   } catch (error) {
     console.error("firebase_verify_failed", {

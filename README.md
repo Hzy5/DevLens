@@ -78,9 +78,13 @@ Never commit `.env.local`, the service account JSON, or a real API key.
 
 1. Import the repo in Vercel.
 2. Go to **Vercel → Project → Settings → Environment Variables**.
-3. Add `OPENAI_API_KEY` and the Firebase client + admin variables above.
+3. Add `OPENAI_API_KEY` and the Firebase **client** variables (`NEXT_PUBLIC_FIREBASE_*`) plus `FIREBASE_ADMIN_PROJECT_ID`.
 4. In Firebase, add your Vercel domain to Authorized domains and create Firestore if it is not already enabled.
-5. Deploy.
+5. Deploy. After changing env vars, **Redeploy** so Production picks them up.
+
+`FIREBASE_ADMIN_CLIENT_EMAIL` and `FIREBASE_ADMIN_PRIVATE_KEY` are optional. Analyze works without them. If you add a service account key, paste the private key on one line with `\n` for newlines. A malformed key must not be set — leave those two blank rather than using a placeholder.
+
+If live Analyze shows “couldn't analyze this right now”, open **Vercel → Project → Logs** for `/api/analyze` and look for `missing_openai_key`, `firebase_admin_cert_failed`, or `analyze_failed`.
 
 Optional: `NEXT_PUBLIC_SITE_URL` for canonical Open Graph URLs.
 

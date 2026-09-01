@@ -62,6 +62,7 @@ async function getDocument(idToken: string, ...segments: string[]) {
   const response = await fetch(documentsUrl(...segments), {
     headers: { Authorization: `Bearer ${idToken}` },
     cache: "no-store",
+    signal: AbortSignal.timeout(2000),
   });
 
   if (response.status === 404) return null;
@@ -82,6 +83,7 @@ async function commit(idToken: string, writes: unknown[]) {
     },
     body: JSON.stringify({ writes }),
     cache: "no-store",
+    signal: AbortSignal.timeout(2000),
   });
 
   if (!response.ok) {

@@ -34,8 +34,30 @@ function nextUtcMidnight(now = new Date()) {
 
 function userRef(uid: string) {
   const db = getAdminDb();
-  if (!db) throw new AnalyzeError("api_failure");
+  if (!db) return null;
   return db.collection("users").doc(uid);
+}
+
+async function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<T>((_, reject) => {
+        timer = setTimeout(() => reject(new Error("timeout")), ms);
+      }),
+    ]);
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+function memoryQuota(userId: string, limit: number): RateLimitResult {
+  const quota = checkDailyQuota(userId, limit);
+  if (!quota.ok) {
+    throw new AnalyzeError("quota_exceeded");
+  }
+  return quota;
 }
 
 export async function reserveDailyUsage(
@@ -44,30 +66,48 @@ export async function reserveDailyUsage(
   idToken?: string,
 ): Promise<RateLimitResult> {
   const db = getAdminDb();
-  if (!db) {
-    if (idToken) {
-      try {
-        return await reserveDailyUsageWithUserToken(user, idToken, limit);
-      } catch (error) {
-        if (error instanceof AnalyzeError) throw error;
-        console.error("firestore_user_reserve_failed", {
-          type: error instanceof Error ? error.name : "unknown",
-        });
-      }
+  if (db) {
+    try {
+      return await withTimeout(reserveWithAdmin(user, limit), 2500);
+    } catch (error) {
+      if (error instanceof AnalyzeError) throw error;
+      console.error("firestore_admin_reserve_failed", {
+        type: error instanceof Error ? error.name : "unknown",
+      });
     }
+  }
 
-    const quota = checkDailyQuota(user.uid, limit);
-    if (!quota.ok) {
-      throw new AnalyzeError("quota_exceeded");
+  if (idToken) {
+    try {
+      return await withTimeout(
+        reserveDailyUsageWithUserToken(user, idToken, limit),
+        2500,
+      );
+    } catch (error) {
+      if (error instanceof AnalyzeError) throw error;
+      console.error("firestore_user_reserve_failed", {
+        type: error instanceof Error ? error.name : "unknown",
+      });
     }
-    return quota;
+  }
+
+  return memoryQuota(user.uid, limit);
+}
+
+async function reserveWithAdmin(
+  user: VerifiedRequestUser,
+  limit: number,
+): Promise<RateLimitResult> {
+  const db = getAdminDb();
+  const profileRef = userRef(user.uid);
+  if (!db || !profileRef) {
+    throw new Error("firestore_admin_unavailable");
   }
 
   const now = new Date();
   const day = utcDayKey(now);
   const resetAt = nextUtcMidnight(now);
   const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - now.getTime()) / 1000));
-  const profileRef = userRef(user.uid);
   const dailyRef = profileRef.collection("daily").doc(day);
 
   const result = await db.runTransaction(async (tx) => {
@@ -126,24 +166,40 @@ export async function reserveDailyUsage(
 }
 
 export async function recordAnalysisUsage(input: RecordAnalysisUsageInput) {
-  const db = getAdminDb();
-  if (!db) {
-    if (!input.idToken) return;
-    await recordAnalysisUsageWithUserToken({
-      user: input.user,
-      idToken: input.idToken,
-      mode: input.mode,
-      ok: input.ok,
-      error: input.error,
-      inputChars: input.inputChars,
-      hadScreenshot: input.hadScreenshot,
-      analysis: input.analysis,
+  try {
+    const db = getAdminDb();
+    const profileRef = userRef(input.user.uid);
+    if (db && profileRef) {
+      await recordWithAdmin(input);
+      return;
+    }
+    if (input.idToken) {
+      await recordAnalysisUsageWithUserToken({
+        user: input.user,
+        idToken: input.idToken,
+        mode: input.mode,
+        ok: input.ok,
+        error: input.error,
+        inputChars: input.inputChars,
+        hadScreenshot: input.hadScreenshot,
+        analysis: input.analysis,
+      });
+    }
+  } catch (error) {
+    console.error("usage_record_failed", {
+      type: error instanceof Error ? error.name : "unknown",
     });
-    return;
+  }
+}
+
+async function recordWithAdmin(input: RecordAnalysisUsageInput) {
+  const db = getAdminDb();
+  const profileRef = userRef(input.user.uid);
+  if (!db || !profileRef) {
+    throw new Error("firestore_admin_unavailable");
   }
 
   const day = utcDayKey();
-  const profileRef = userRef(input.user.uid);
   const dailyRef = profileRef.collection("daily").doc(day);
   const eventRef = profileRef.collection("analyses").doc();
 

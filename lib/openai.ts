@@ -8,8 +8,9 @@ import type { Analysis, InputMode, ScreenshotPayload } from "@/types/analysis";
 const MODEL_ID = "gpt-5.4-mini";
 
 function getClient() {
-  const apiKey = process.env.OPENAI_API_KEY;
+  const apiKey = process.env.OPENAI_API_KEY?.trim().replace(/^["']|["']$/g, "");
   if (!apiKey) {
+    console.error("analyze_failed", { reason: "missing_openai_key" });
     throw new AnalyzeError("api_failure");
   }
   return createOpenAI({ apiKey });
@@ -70,7 +71,9 @@ export async function analyzeWithOpenAI(options: {
       // Log status only — never the key, prompt, or provider body.
       console.error("analyze_failed", { status: error.statusCode });
     } else {
-      console.error("analyze_failed", { type: error instanceof Error ? error.name : "unknown" });
+      console.error("analyze_failed", {
+        type: error instanceof Error ? error.name : "unknown",
+      });
     }
 
     throw new AnalyzeError("api_failure");

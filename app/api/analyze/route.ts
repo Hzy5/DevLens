@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import { DAILY_ANALYSIS_LIMIT, MAX_BODY_BYTES } from "@/lib/constants";
 import { AnalyzeError, errorJson } from "@/lib/errors";
 import { verifyRequestUser } from "@/lib/firebase-admin";
@@ -67,8 +67,8 @@ export async function POST(request: Request) {
 
     try {
       const analysis = await analyzeWithOpenAI({ input, mode, image });
-      try {
-        await recordAnalysisUsage({
+      after(() =>
+        recordAnalysisUsage({
           user,
           idToken,
           mode,
@@ -76,12 +76,8 @@ export async function POST(request: Request) {
           inputChars: input.length,
           hadScreenshot: Boolean(image),
           analysis,
-        });
-      } catch (error) {
-        console.error("usage_record_failed", {
-          type: error instanceof Error ? error.name : "unknown",
-        });
-      }
+        }),
+      );
 
       return NextResponse.json(
         { ok: true, analysis, remainingToday: quota.remaining },
@@ -90,8 +86,8 @@ export async function POST(request: Request) {
     } catch (error) {
       const code =
         error instanceof AnalyzeError ? error.code : "api_failure";
-      try {
-        await recordAnalysisUsage({
+      after(() =>
+        recordAnalysisUsage({
           user,
           idToken,
           mode,
@@ -99,12 +95,8 @@ export async function POST(request: Request) {
           error: code,
           inputChars: input.length,
           hadScreenshot: Boolean(image),
-        });
-      } catch (recordError) {
-        console.error("usage_record_failed", {
-          type: recordError instanceof Error ? recordError.name : "unknown",
-        });
-      }
+        }),
+      );
       throw error;
     }
   } catch (error) {

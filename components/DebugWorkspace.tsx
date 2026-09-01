@@ -171,8 +171,18 @@ export function DebugWorkspace() {
       }
 
       if (!payload || payload.ok !== true) {
+        if (!payload && (response.status === 504 || response.status === 508)) {
+          setError("That took too long. Try a smaller log.");
+          setView("input");
+          trackEvent("analysis_failed");
+          return;
+        }
         const code = payload && payload.ok === false ? payload.error : "api_failure";
-        setError(payload && payload.ok === false ? payload.message : ERROR_MESSAGES[code as ClientErrorCode] ?? ERROR_MESSAGES.api_failure);
+        setError(
+          payload && payload.ok === false
+            ? payload.message
+            : ERROR_MESSAGES[code as ClientErrorCode] ?? ERROR_MESSAGES.api_failure,
+        );
         setView("input");
         trackEvent("analysis_failed");
         return;
