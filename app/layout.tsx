@@ -44,18 +44,30 @@ export const metadata: Metadata = {
   ],
   icons: {
     icon: "/favicon.svg",
-    apple: "/favicon.svg",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: APP_TITLE,
     description: APP_DESCRIPTION,
     siteName: APP_NAME,
     type: "website",
+    url: "/",
+    images: [
+      {
+        url: "/og.png",
+        secureUrl: "/og.png",
+        width: 1200,
+        height: 630,
+        type: "image/png",
+        alt: "DevLens — Drop the error. See what's actually wrong.",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: APP_TITLE,
     description: APP_DESCRIPTION,
+    images: ["/og.png"],
   },
 };
 
