@@ -1,5 +1,7 @@
 "use client";
 
+import { useAuth } from "@/components/AuthProvider";
+import { useRouter } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 import { AnalysisResult } from "@/components/AnalysisResult";
 import { CodeInput } from "@/components/CodeInput";
@@ -8,7 +10,12 @@ import { InputModeTabs } from "@/components/InputModeTabs";
 import { LoadingState } from "@/components/LoadingState";
 import { ScreenshotUpload } from "@/components/ScreenshotUpload";
 import { trackEvent } from "@/lib/analytics";
-import { ERROR_MESSAGES, MAX_IMAGE_BYTES, PRIVACY_NOTE } from "@/lib/constants";
+import {
+  DAILY_ANALYSIS_LIMIT,
+  ERROR_MESSAGES,
+  MAX_IMAGE_BYTES,
+  PRIVACY_NOTE,
+} from "@/lib/constants";
 import { cn } from "@/lib/cn";
 import type { ExampleCard } from "@/lib/examples";
 import type {
@@ -26,6 +33,14 @@ type WorkspaceView = "input" | "loading" | "ready" | "result";
 type AttachedImage = ScreenshotPayload & { previewUrl: string };
 
 export function DebugWorkspace() {
+  const {
+    isSignedIn,
+    isEmailVerified,
+    isLoaded,
+    getIdToken,
+    refreshEmailVerification,
+  } = useAuth();
+  const router = useRouter();
   const [mode, setMode] = useState<InputMode>("auto");
   const [input, setInput] = useState("");
   const [image, setImage] = useState<AttachedImage | null>(null);
@@ -94,7 +109,27 @@ export function DebugWorkspace() {
     });
   }
 
+  function requireSignIn() {
+    router.push("/sign-in?redirect_url=/#debug");
+  }
+
+  function requireVerifiedEmail() {
+    router.push("/verify-email");
+  }
+
   async function analyze() {
+    if (!isSignedIn) {
+      requireSignIn();
+      return;
+    }
+    if (!isEmailVerified) {
+      const verified = await refreshEmailVerification();
+      if (!verified) {
+        requireVerifiedEmail();
+        return;
+      }
+    }
+
     if (!input.trim() && !image) {
       setError(ERROR_MESSAGES.empty_input);
       return;
@@ -105,9 +140,19 @@ export function DebugWorkspace() {
     trackEvent("analysis_started");
 
     try {
+      const token = await getIdToken(true);
+      if (!token) {
+        requireSignIn();
+        setView("input");
+        return;
+      }
+
       const response = await fetch("/api/analyze", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           mode,
           input,
@@ -208,6 +253,16 @@ export function DebugWorkspace() {
               disabled={busy}
             />
             <p className="text-xs leading-5 text-muted">{PRIVACY_NOTE}</p>
+            {isLoaded && !isSignedIn ? (
+              <p className="text-sm text-muted-strong">
+                Sign in to analyze. Free accounts get {DAILY_ANALYSIS_LIMIT} diagnoses a day.
+              </p>
+            ) : null}
+            {isLoaded && isSignedIn && !isEmailVerified ? (
+              <p className="text-sm text-muted-strong">
+                Confirm your email to analyze. Check your inbox for the link we sent.
+              </p>
+            ) : null}
             {error ? (
               <p role="alert" className="text-sm text-danger">
                 {error}
@@ -216,8 +271,10 @@ export function DebugWorkspace() {
             <div className="flex flex-wrap items-center gap-3">
               <button
                 type="button"
-                onClick={() => void analyze()}
-                disabled={busy}
+                onClick={() => {
+                  void analyze();
+                }}
+                disabled={busy || !isLoaded}
                 className={cn(
                   "inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm font-semibold text-background",
                   "transition-opacity hover:opacity-90",
@@ -226,7 +283,11 @@ export function DebugWorkspace() {
                 )}
               >
                 <SearchIcon />
-                Analyze
+                {isLoaded && !isSignedIn
+                  ? "Sign in to analyze"
+                  : isLoaded && !isEmailVerified
+                    ? "Confirm email to analyze"
+                    : "Analyze"}
               </button>
               <button
                 type="button"

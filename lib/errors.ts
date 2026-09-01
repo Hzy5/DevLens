@@ -19,8 +19,13 @@ export function statusForCode(code: ClientErrorCode): number {
     case "unsupported_file":
     case "invalid_request":
       return 400;
+    case "unauthorized":
+      return 401;
+    case "email_not_verified":
+      return 403;
     case "too_large":
       return 413;
+    case "quota_exceeded":
     case "rate_limited":
       return 429;
     case "api_failure":

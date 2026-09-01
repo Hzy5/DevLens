@@ -1,14 +1,8 @@
 /**
- * In-memory rate limiter for the Vercel MVP.
+ * Short-window burst limiter. Process-local on Vercel.
  *
- * This is process-local. On Vercel, each isolate has its own map, so it
- * blocks obvious repeated requests from the same instance but is not a
- * global guarantee. That is enough for V1 abuse protection.
- *
- * Upgrade later with one of:
- * - Vercel Firewall / WAF rate-limiting rules
- * - Upstash Redis sliding window
- * - Vercel Redis / another shared store
+ * Daily analyze quota lives in Firestore (`lib/usage.ts`) so it is shared
+ * across isolates. This map only slows repeated hits on the same instance.
  */
 
 type Bucket = {
@@ -17,7 +11,7 @@ type Bucket = {
 };
 
 const WINDOW_MS = 10 * 60 * 1000;
-const MAX_REQUESTS = 10;
+const MAX_REQUESTS = 8;
 
 const buckets = new Map<string, Bucket>();
 
@@ -49,6 +43,48 @@ export type RateLimitResult = {
   resetAt: number;
   retryAfterSeconds: number;
 };
+
+export function checkDailyQuota(
+  userId: string,
+  limit: number,
+): RateLimitResult {
+  const now = Date.now();
+  const resetAt = Date.UTC(
+    new Date(now).getUTCFullYear(),
+    new Date(now).getUTCMonth(),
+    new Date(now).getUTCDate() + 1,
+  );
+  const key = `daily:${userId}:${new Date(now).toISOString().slice(0, 10)}`;
+  prune(now);
+
+  const existing = buckets.get(key);
+  if (!existing || existing.resetAt <= now) {
+    buckets.set(key, { count: 1, resetAt });
+    return {
+      ok: true,
+      remaining: limit - 1,
+      resetAt,
+      retryAfterSeconds: Math.max(1, Math.ceil((resetAt - now) / 1000)),
+    };
+  }
+
+  if (existing.count >= limit) {
+    return {
+      ok: false,
+      remaining: 0,
+      resetAt: existing.resetAt,
+      retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
+    };
+  }
+
+  existing.count += 1;
+  return {
+    ok: true,
+    remaining: limit - existing.count,
+    resetAt: existing.resetAt,
+    retryAfterSeconds: Math.max(1, Math.ceil((existing.resetAt - now) / 1000)),
+  };
+}
 
 export function checkRateLimit(id: string): RateLimitResult {
   const now = Date.now();

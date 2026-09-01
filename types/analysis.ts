@@ -55,6 +55,9 @@ export const CLIENT_ERROR_CODES = [
   "unsupported_file",
   "too_large",
   "invalid_request",
+  "unauthorized",
+  "email_not_verified",
+  "quota_exceeded",
   "rate_limited",
   "api_failure",
 ] as const;
@@ -70,6 +73,7 @@ export type AnalyzeErrorResponse = {
 export type AnalyzeSuccessResponse = {
   ok: true;
   analysis: Analysis;
+  remainingToday: number;
 };
 
 export type AnalyzeResponse = AnalyzeSuccessResponse | AnalyzeErrorResponse;

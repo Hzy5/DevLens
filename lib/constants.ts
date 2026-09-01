@@ -16,11 +16,16 @@ export const ALLOWED_IMAGE_TYPES = [
   "image/webp",
 ] as const;
 
+export const DAILY_ANALYSIS_LIMIT = 15;
+
 export const ERROR_MESSAGES: Record<ClientErrorCode, string> = {
   empty_input: "Paste something for me to inspect.",
   unsupported_file: "That file type isn't supported yet.",
   too_large: "That input is too large. Try a smaller log or screenshot.",
   invalid_request: "DevLens couldn't analyze this right now. Try again.",
+  unauthorized: "Sign in to analyze.",
+  email_not_verified: "Confirm your email before analyzing.",
+  quota_exceeded: "You've used today's analyses. Try again tomorrow.",
   rate_limited: "Too many requests. Try again shortly.",
   api_failure: "DevLens couldn't analyze this right now. Try again.",
 };

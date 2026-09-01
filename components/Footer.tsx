@@ -1,9 +1,10 @@
 import { DevLensLogo } from "@/components/DevLensLogo";
 
 const SITE_LINKS = [
-  { href: "#debug", label: "Debug" },
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#examples", label: "Examples" },
+  { href: "/#debug", label: "Debug" },
+  { href: "/#how-it-works", label: "How it works" },
+  { href: "/#examples", label: "Examples" },
+  { href: "/sign-up", label: "Sign up" },
 ];
 
 const ELSEWHERE_LINKS = [
