@@ -21,7 +21,7 @@ export function AuthNav() {
         </Link>
         <Link
           href="/sign-up"
-          className="rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-on-accent transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           Sign up
         </Link>
@@ -35,7 +35,7 @@ export function AuthNav() {
     <div className="flex items-center gap-2 sm:gap-3">
       <Link
         href={isEmailVerified ? "/#debug" : "/verify-email"}
-        className="hidden rounded-md bg-foreground px-3 py-1.5 text-sm font-medium text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:inline-flex"
+        className="hidden rounded-md bg-accent px-3 py-1.5 text-sm font-medium text-on-accent transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:inline-flex"
       >
         {isEmailVerified ? "Try DevLens" : "Confirm email"}
       </Link>

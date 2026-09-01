@@ -99,14 +99,14 @@ export function VerifyEmailPanel() {
   if (!isLoaded || !isSignedIn || isEmailVerified) {
     return (
       <div
-        className="h-48 w-full max-w-sm rounded-xl border border-border bg-surface"
+        className="h-48 w-full max-w-sm rounded-xl border border-border bg-surface/90"
         aria-hidden="true"
       />
     );
   }
 
   return (
-    <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-6">
+    <div className="panel w-full max-w-sm rounded-xl border border-border bg-surface/90 p-6 backdrop-blur-sm">
       <h1 className="text-lg font-semibold text-foreground">Confirm your email</h1>
       <p className="mt-2 text-sm leading-6 text-muted">
         We sent a confirmation link to{" "}
@@ -129,7 +129,7 @@ export function VerifyEmailPanel() {
           onClick={() => void onConfirmed()}
           disabled={busy}
           className={cn(
-            "w-full rounded-md bg-foreground px-3 py-2.5 text-sm font-medium text-background",
+            "w-full rounded-md bg-accent px-3 py-2.5 text-sm font-medium text-on-accent",
             "transition-opacity hover:opacity-90 disabled:opacity-50",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
           )}

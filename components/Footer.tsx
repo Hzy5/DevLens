@@ -1,4 +1,5 @@
 import { DevLensLogo } from "@/components/DevLensLogo";
+import { PAGE_WRAP } from "@/lib/layout";
 
 const SITE_LINKS = [
   { href: "/#debug", label: "Debug" },
@@ -18,8 +19,8 @@ const linkClass =
 
 export function Footer() {
   return (
-    <footer className="border-t border-border">
-      <div className="mx-auto grid w-full max-w-6xl gap-8 px-4 py-10 sm:grid-cols-3">
+    <footer className="mt-8 border-t border-border bg-surface/40">
+      <div className={`${PAGE_WRAP} grid gap-8 py-10 sm:grid-cols-3`}>
         <div>
           <DevLensLogo variant="full" size="sm" />
           <p className="mt-3 max-w-sm text-sm leading-6 text-muted">
@@ -57,7 +58,7 @@ export function Footer() {
         </div>
       </div>
       <div className="border-t border-border">
-        <p className="mx-auto max-w-6xl px-4 py-4 text-xs text-muted">
+        <p className={`${PAGE_WRAP} py-4 text-xs text-muted`}>
           © 2026 HzY Develops. All rights reserved.
         </p>
       </div>

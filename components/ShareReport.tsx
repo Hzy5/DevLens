@@ -66,7 +66,7 @@ export function ShareReport({ analysis, onAnalyzeAnother }: ShareReportProps) {
         <button
           type="button"
           onClick={onAnalyzeAnother}
-          className="rounded-md bg-foreground px-3 py-2 text-sm font-medium text-background transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="rounded-md bg-accent px-3 py-2 text-sm font-medium text-on-accent transition-opacity hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           Analyze Another
         </button>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthNav } from "@/components/AuthNav";
 import { DevLensLogo } from "@/components/DevLensLogo";
+import { PAGE_WRAP } from "@/lib/layout";
 
 const LINKS = [
   { href: "/#debug", label: "Debug" },
@@ -10,8 +11,8 @@ const LINKS = [
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+    <header className="sticky top-0 z-30 border-b border-border/80 bg-background/70 backdrop-blur-xl">
+      <div className={`${PAGE_WRAP} flex h-14 items-center justify-between`}>
         <Link
           href="/"
           className="rounded-md text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
@@ -23,7 +24,7 @@ export function Navbar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-muted transition-colors hover:text-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className="font-mono text-[12px] uppercase tracking-[0.14em] text-muted transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {link.label}
             </Link>

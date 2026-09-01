@@ -55,7 +55,7 @@ export function AuthForm({ mode }: AuthFormProps) {
   }
 
   return (
-    <div className="w-full max-w-sm rounded-xl border border-border bg-surface p-6">
+    <div className="panel w-full max-w-sm rounded-xl border border-border bg-surface/90 p-6 backdrop-blur-sm">
       <form onSubmit={onSubmit} className="space-y-4">
         <div className="space-y-1.5">
           <label htmlFor="email" className="text-sm font-medium text-foreground">
@@ -95,7 +95,7 @@ export function AuthForm({ mode }: AuthFormProps) {
           type="submit"
           disabled={busy}
           className={cn(
-            "w-full rounded-md bg-foreground px-3 py-2.5 text-sm font-medium text-background",
+            "w-full rounded-md bg-accent px-3 py-2.5 text-sm font-medium text-on-accent",
             "transition-opacity hover:opacity-90 disabled:opacity-50",
             "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
           )}

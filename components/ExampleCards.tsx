@@ -20,7 +20,7 @@ export function ExampleCards({ onSelect, disabled }: ExampleCardsProps) {
             type="button"
             disabled={disabled}
             onClick={() => onSelect(example)}
-            className="rounded-lg border border-border bg-surface px-4 py-3 text-left transition-colors hover:border-foreground/20 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
+            className="panel rounded-lg border border-border bg-surface/90 px-4 py-3 text-left transition-colors hover:border-accent/40 hover:bg-surface-2 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:opacity-50"
           >
             <p className="text-sm font-medium text-foreground">{example.title}</p>
             <p className="mt-1 font-mono text-xs leading-5 text-muted">{example.preview}</p>

@@ -43,7 +43,7 @@ export function InputModeTabs({ value, onChange }: InputModeTabsProps) {
               "rounded-md px-2.5 py-1.5 text-xs font-medium tracking-tight transition-colors sm:text-[13px]",
               "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
               selected
-                ? "bg-surface-2 text-foreground"
+                ? "bg-accent text-on-accent"
                 : "text-muted hover:bg-surface-2/70 hover:text-foreground",
             )}
           >

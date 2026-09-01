@@ -15,8 +15,8 @@ export function createOgImage() {
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          background: "#09090b",
-          color: "#fafafa",
+          background: "#06080d",
+          color: "#eef4f8",
           padding: "72px 80px",
         }}
       >
@@ -32,11 +32,11 @@ export function createOgImage() {
               width: 56,
               height: 56,
               borderRadius: 14,
-              border: "2px solid #27272a",
+              border: "2px solid #2a3a52",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "#22d3ee",
+              color: "#3de0c8",
               fontSize: 28,
               fontWeight: 600,
             }}
@@ -71,7 +71,7 @@ export function createOgImage() {
             fontWeight: 600,
             letterSpacing: "-0.045em",
             lineHeight: 1.1,
-            color: "#22d3ee",
+            color: "#3de0c8",
           }}
         >
           See what&apos;s actually wrong.
@@ -80,7 +80,7 @@ export function createOgImage() {
           style={{
             marginTop: 36,
             fontSize: 24,
-            color: "#a1a1aa",
+            color: "#8b9bb0",
           }}
         >
           Paste an error, crash log, code, API response, or screenshot.

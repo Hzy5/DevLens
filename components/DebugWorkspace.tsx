@@ -17,6 +17,7 @@ import {
   PRIVACY_NOTE,
 } from "@/lib/constants";
 import { cn } from "@/lib/cn";
+import { PAGE_WRAP } from "@/lib/layout";
 import type { ExampleCard } from "@/lib/examples";
 import type {
   Analysis,
@@ -199,7 +200,7 @@ export function DebugWorkspace() {
   }
 
   return (
-    <section id="debug" aria-labelledby="workspace-heading" className="mx-auto w-full max-w-3xl px-4">
+    <section id="debug" aria-labelledby="workspace-heading" className={PAGE_WRAP}>
       <h2 id="workspace-heading" className="sr-only">
         Debug workspace
       </h2>
@@ -210,7 +211,7 @@ export function DebugWorkspace() {
         <LoadingState ready={view === "ready"} />
       ) : (
         <div
-          className="overflow-hidden rounded-xl border border-border bg-surface"
+          className="panel overflow-hidden rounded-xl border border-border bg-surface/90 backdrop-blur-sm"
           onKeyDown={(event) => {
             if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
               event.preventDefault();
@@ -237,6 +238,15 @@ export function DebugWorkspace() {
             if (event.dataTransfer.files.length) onFiles(event.dataTransfer.files);
           }}
         >
+          <div className="flex items-center gap-2 border-b border-border px-3 py-2">
+            <span className="size-2 rounded-full bg-[#ff5f57]" aria-hidden="true" />
+            <span className="size-2 rounded-full bg-[#febc2e]" aria-hidden="true" />
+            <span className="size-2 rounded-full bg-[#28c840]" aria-hidden="true" />
+            <p className="ml-2 font-mono text-[11px] text-muted">debug.session</p>
+            <p className="ml-auto font-mono text-[10px] uppercase tracking-[0.16em] text-accent">
+              live
+            </p>
+          </div>
           <InputModeTabs value={mode} onChange={setModeAndTrack} />
           <CodeInput
             value={input}
@@ -276,7 +286,7 @@ export function DebugWorkspace() {
                 }}
                 disabled={busy || !isLoaded}
                 className={cn(
-                  "inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2.5 text-sm font-semibold text-background",
+                  "inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2.5 text-sm font-semibold text-on-accent",
                   "transition-opacity hover:opacity-90",
                   "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
                   "disabled:opacity-50",

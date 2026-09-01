@@ -24,11 +24,11 @@ export function AnalysisResult({ analysis, onAnalyzeAnother }: AnalysisResultPro
   return (
     <article
       aria-labelledby="diagnosis-title"
-      className="overflow-hidden rounded-xl border border-border bg-surface"
+      className="panel overflow-hidden rounded-xl border border-border bg-surface/90"
     >
       <header className="space-y-4 border-b border-border px-5 py-6 sm:px-7">
-        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted">
-          🔍 DevLens
+        <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-accent">
+          Diagnosis
         </p>
         <h2
           id="diagnosis-title"

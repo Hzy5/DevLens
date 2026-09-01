@@ -27,7 +27,7 @@ export function LoadingState({ ready = false }: LoadingStateProps) {
 
   return (
     <div
-      className="rounded-xl border border-border bg-surface p-6 sm:p-8"
+      className="panel rounded-xl border border-border bg-surface/90 p-6 sm:p-8"
       role="status"
       aria-live="polite"
       aria-busy={!ready}
